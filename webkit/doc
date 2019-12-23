@@ -1,0 +1,7 @@
+1.结合了DS-Android-JSBridge + VasSonic + TBS(X5)
+2.webView与具体的页面分离,　webView只做web页面展示
+3.增加webView拓展属性能力
+4.webView可直接从xml中动态引入
+5.FlexWebActivity/FlexWebFragment
+6.Fix Lollipo webView crash problem
+7.跨组件分离
