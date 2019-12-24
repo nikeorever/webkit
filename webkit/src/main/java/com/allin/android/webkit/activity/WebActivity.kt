@@ -1,19 +1,22 @@
 package com.allin.android.webkit.activity
 
+import android.content.Context
 import android.webkit.JavascriptInterface
 import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
 import com.allin.android.webkit.JavascriptApiRoom
 import com.allin.android.webkit.annotations.JavascriptApi
 import com.allin.android.webkit.api.NativeApiInvoker
+import com.allin.android.webkit.find
 import wendu.dsbridge.DWebView
 import java.lang.reflect.Method
 
 class WebActivity {
 
-    fun checkRoom() {
+    fun checkRoom(context: Context) {
         val javaScriptNamespaceInterfaces = JavascriptApiRoom.javaScriptNamespaceInterfaces
-        javaScriptNamespaceInterfaces[""]?.find("callNative1")?.invoke(this, "param")
+        println(javaScriptNamespaceInterfaces)
+        javaScriptNamespaceInterfaces[""].find("callNative1")?.invoke(context, "param")
     }
 
     fun onCreate(activity: AppCompatActivity) {

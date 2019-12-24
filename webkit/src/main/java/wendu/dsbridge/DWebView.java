@@ -26,7 +26,7 @@ import androidx.appcompat.app.AlertDialog;
 import com.allin.android.webkit.JavascriptApiRoom;
 import com.allin.android.webkit.JavascriptApiRoomKt;
 import com.allin.android.webkit.api.AsyncCallback;
-import com.allin.android.webkit.api.AsyncNativeApiInvoker;
+import com.allin.android.webkit.api.MethodType;
 import com.allin.android.webkit.api.NativeApiInvoker;
 import com.tencent.smtt.export.external.interfaces.ConsoleMessage;
 import com.tencent.smtt.export.external.interfaces.GeolocationPermissionsCallback;
@@ -52,6 +52,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import kotlin.reflect.KFunction;
 
 import static android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW;
 
@@ -96,7 +98,7 @@ public class DWebView extends WebView {
             String[] nameStr = parseNamespace(methodName.trim());
             methodName = nameStr[1];
             // xianxueliang changed: start
-            Map<Method, NativeApiInvoker> methodNativeApiInvoker = getJavaScriptNamespaceInterfaces().get(nameStr[0]);
+            Map<KFunction<?>, NativeApiInvoker> methodNativeApiInvoker = getJavaScriptNamespaceInterfaces().get(nameStr[0]);
             JSONObject ret = new JSONObject();
             try {
                 ret.put("code", -1);
@@ -126,7 +128,7 @@ public class DWebView extends WebView {
             }
             NativeApiInvoker nativeApiInvoker = JavascriptApiRoomKt
                     .find(methodNativeApiInvoker, methodName);
-            if (nativeApiInvoker instanceof AsyncNativeApiInvoker) {
+            if (nativeApiInvoker.methodInfo().getMethodType() == MethodType.ASYNC) {
                 // async
                 final String cb = callback;
                 try {
@@ -389,12 +391,12 @@ public class DWebView extends WebView {
                 String[] nameStr = parseNamespace(methodName);
 
                 // xianxueliang changed: start
-                Map<Method, NativeApiInvoker> methodNativeApiInvoker =
+                Map<KFunction<?>, NativeApiInvoker> methodNativeApiInvoker =
                         getJavaScriptNamespaceInterfaces().get(nameStr[0]);
                 NativeApiInvoker nativeApiInvoker =
                         JavascriptApiRoomKt.find(methodNativeApiInvoker, nameStr[1]);
                 boolean asyn = false;
-                if (nativeApiInvoker instanceof AsyncNativeApiInvoker) {
+                if (nativeApiInvoker.methodInfo().getMethodType() == MethodType.ASYNC) {
                     asyn = true;
                 }
                 if (nativeApiInvoker != null) {
@@ -1075,7 +1077,7 @@ public class DWebView extends WebView {
     }
 
     // xianxueliang changed: start
-    private Map<String, Map<Method, NativeApiInvoker>> getJavaScriptNamespaceInterfaces() {
+    private Map<String, Map<KFunction<?>, NativeApiInvoker>> getJavaScriptNamespaceInterfaces() {
         return JavascriptApiRoom.INSTANCE.getJavaScriptNamespaceInterfaces();
     }
     // xianxueliang changed: end

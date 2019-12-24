@@ -2,9 +2,7 @@ package com.allin.android.webkit.compiler
 
 import com.allin.android.webkit.annotations.JavascriptApi
 import com.allin.android.webkit.annotations.JavascriptNamespace
-import com.allin.android.webkit.api.GENERATED_PACKAGE_NAME
-import com.allin.android.webkit.api.JavascriptApiCollector
-import com.allin.android.webkit.api.NativeApiInvoker
+import com.allin.android.webkit.api.*
 import com.google.auto.service.AutoService
 import com.squareup.javapoet.*
 import com.sun.source.util.Trees
@@ -97,6 +95,7 @@ class WebkitAnnotationProcessor : AbstractProcessor() {
                                         ParameterSpec
                                             .builder(parameter.parameterizedType, parameter.name)
                                             .addAnnotation(CLASS_NAME_ANDROIDX_NONNULL)
+                                            .addModifiers(Modifier.FINAL)
                                             .build()
                                     }
                                 )
@@ -108,43 +107,28 @@ class WebkitAnnotationProcessor : AbstractProcessor() {
                                                 val elementClassName =
                                                     ClassName.get(packageName, className)
                                                 builder.addStatement(
-                                                    "final \$T instance = new \$T()",
+                                                    "\$T instance = new \$T()",
                                                     elementClassName,
                                                     elementClassName
                                                 )
-                                                builder.beginControlFlow("for (final Method method : instance.getClass().getDeclaredMethods())")
-
-                                                builder.beginControlFlow("if (!method.isAccessible())")
-                                                builder.addStatement("method.setAccessible(true)")
-                                                builder.endControlFlow()
-
                                                 builder.beginControlFlow(
-                                                    "if (method.isAnnotationPresent(\$T.class))",
-                                                    JavascriptApi::class.java
-                                                )
-
-                                                builder.beginControlFlow(
-                                                    "arg0.put(method, new \$T()",
-                                                    NativeApiInvoker::class.java
-                                                )
-
-                                                builder.add(
-                                                    "@\$T\n",
-                                                    CLASS_NAME_ANDROIDX_NULLABLE
+                                                    "\$T.functionInvokerMappersOf(instance, new \$T()",
+                                                    ClassName.get(
+                                                        "com.allin.android.webkit.internal",
+                                                        "MethodChecker"
+                                                    ),
+                                                    ClassName.get(FunctionInvokerMappersSupplier::class.java)
                                                 )
                                                 builder.add("@Override\n")
                                                 builder.beginControlFlow(
-                                                    "public Object invoke(@\$T Object... params) throws Exception",
-                                                    CLASS_NAME_ANDROIDX_NULLABLE
+                                                    "public void get(@\$T Map<KFunction<?>, ? extends \$T> mapper)",
+                                                    CLASS_NAME_ANDROIDX_NONNULL,
+                                                    ClassName.get(NativeApiInvoker::class.java)
                                                 )
-                                                builder.addStatement("return method.invoke(instance, params)")
+                                                builder.addStatement("arg0.putAll(mapper)")
                                                 builder.endControlFlow()
-
                                                 builder.endControlFlow(")")
 
-                                                builder.endControlFlow()
-
-                                                builder.endControlFlow()
                                             }
                                             "namespace" -> {
                                                 builder.addStatement("return \"${javascriptNamespace.namespace}\"")
@@ -157,7 +141,7 @@ class WebkitAnnotationProcessor : AbstractProcessor() {
                         }
                     )
                     .build()
-            ).addFileComment("Generated code from Allin WebKit. Do not modify!").build()
+            ).addFileComment("Generated code from AWebkit. Do not modify!").build()
                 .writeTo(filer)
         }
         return false

@@ -10,10 +10,10 @@ import com.allin.android.webkit.annotations.JavascriptNamespace
 @JavascriptNamespace(namespace = "")
 class ComponentTwoJavascriptApi {
 
-    @JavascriptApi(passContentToFirstParameter = true)
+    @JavascriptApi(passContextToFirstParameter = false)
     @Keep
     @JavascriptInterface
-    fun callNative2() {
+    fun callNative2(param: String) {
         Log.i("ComponentTwoJavascriptApi", "callNative2")
     }
 }

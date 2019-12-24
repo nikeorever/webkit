@@ -1,4 +1,5 @@
 package com.allin.android.webkit.api
 
-class MethodType {
+enum class MethodType {
+    SYNC, ASYNC
 }

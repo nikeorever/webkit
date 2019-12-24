@@ -2,6 +2,7 @@ package com.allin.android.webkit
 
 import com.allin.android.webkit.api.NativeApiInvoker
 import java.lang.reflect.Method
+import kotlin.reflect.KFunction
 
 object JavascriptApiRoom {
 
@@ -16,10 +17,10 @@ object JavascriptApiRoom {
 
         2
      */
-    val javaScriptNamespaceInterfaces: MutableMap<String, MutableMap<Method, NativeApiInvoker>> = mutableMapOf()
+    val javaScriptNamespaceInterfaces: MutableMap<String, MutableMap<KFunction<*>, NativeApiInvoker>> = mutableMapOf()
 }
 
-fun Map<Method, NativeApiInvoker>?.find(methodNameFromJavascript: String?): NativeApiInvoker? {
+fun Map<KFunction<*>, NativeApiInvoker>?.find(methodNameFromJavascript: String?): NativeApiInvoker? {
     return this?.filterKeys { method ->
         methodNameFromJavascript == method.name
     }?.let { match ->

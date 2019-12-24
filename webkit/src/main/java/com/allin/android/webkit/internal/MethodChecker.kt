@@ -1,52 +1,101 @@
-package com.allin.android.webkit.api.internal
+@file:JvmName("MethodChecker")
+@file:JvmMultifileClass
 
+
+package com.allin.android.webkit.internal
+
+import android.content.Context
+import androidx.annotation.RestrictTo
 import com.allin.android.webkit.annotations.JavascriptApi
-import com.allin.android.webkit.api.AsyncCallback
-import java.lang.reflect.Method
-import java.util.*
+import com.allin.android.webkit.api.*
+import kotlin.reflect.KFunction
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.hasAnnotation
+import kotlin.reflect.full.valueParameters
+import kotlin.reflect.jvm.isAccessible
 
-fun checkMethod(cls: Class<*>, method: Method) {
-    if (!method.isAccessible) {
-        method.isAccessible = true
-    }
-    if (method.isAnnotationPresent(JavascriptApi::class.java)) {
-        val javascriptApi = method.getAnnotation(JavascriptApi::class.java)
-        if (javascriptApi.passContextToFirstParameter) {
-            try {
-                cls.getDeclaredMethod(
-                    method.name, android.content.Context::class.java, Any::class.java,
-                    AsyncCallback::class.java
-                )
-                // async method found
-            } catch (ignored: NoSuchMethodException) {
-                try {
-                    cls.getDeclaredMethod(
-                        method.name,
-                        android.content.Context::class.java,
-                        Any::class.java
-                    )
-                    // sync method found
-                } catch (ex: NoSuchMethodException) { // illegal method found
-                    throw IllegalArgumentException(
-                        String.format(
-                            Locale.getDefault(),
-                            "method(%s) parameterTypes must be (%s, %s, %s) or (%s, %s)",
-                            method.name,
-                            android.content.Context::class.java,
-                            Any::class.java,
-                            AsyncCallback::class.java,
-                            android.content.Context::class.java,
-                            Any::class.java
-                        )
-                    )
-                }
-            }
-        } else {
-
+@RestrictTo(value = [RestrictTo.Scope.LIBRARY_GROUP_PREFIX])
+fun functionInvokerMappersOf(instance: Any, supplier: FunctionInvokerMappersSupplier) {
+    val members = instance::class.members
+    members.filter { it is KFunction && it.hasAnnotation<JavascriptApi>()}.map {
+        val kFunction = it as KFunction
+        if (!kFunction.isAccessible) {
+            kFunction.isAccessible = true
         }
-    } else {
-        throw IllegalStateException(
-            "${method.name} must annotated ${JavascriptApi::class.java.canonicalName}"
-        )
+        val javascriptApi = kFunction.findAnnotation<JavascriptApi>()!!
+        val valueParameters = kFunction.valueParameters
+        if (javascriptApi.passContextToFirstParameter) {
+            //Context, Any, AsyncCallback
+            //Context, Any
+
+            // check parameters
+            runCatching {
+                when (valueParameters.size) {
+                    2 -> {
+                        valueParameters[0].type === Context::class
+                        valueParameters[1].type !== AsyncCallback::class
+
+                        MethodInfo(methodType = MethodType.SYNC, passContextToFirstParameter = true)
+                    }
+                    3 -> {
+                        valueParameters[0].type === Context::class
+                        valueParameters[1].type !== AsyncCallback::class
+                        valueParameters[2].type === AsyncCallback::class
+
+                        MethodInfo(methodType = MethodType.ASYNC, passContextToFirstParameter = true)
+                    }
+                    else -> {
+                        val errorMessage = ""
+                        throw NoSuchMethodException("")
+                    }
+                }
+            }.onFailure {
+                throw NoSuchMethodException("")
+            }.map { methodInfo ->
+                kFunction to object :NativeApiInvoker {
+                    override fun invoke(vararg params: Any?): Any? {
+                        return kFunction.call(instance, *params)
+                    }
+                    override fun methodInfo(): MethodInfo = methodInfo
+                }
+            }.getOrThrow()
+        } else {
+            //Any, AsyncCallback
+            //Any
+
+            // check parameters
+            runCatching {
+                when (valueParameters.size) {
+                    1 -> {
+                        valueParameters[0].type !== AsyncCallback::class
+
+                        MethodInfo(methodType = MethodType.SYNC, passContextToFirstParameter = false)
+                    }
+                    2 -> {
+                        valueParameters[0].type !== AsyncCallback::class
+                        valueParameters[1].type === AsyncCallback::class
+
+                        MethodInfo(methodType = MethodType.ASYNC, passContextToFirstParameter = false)
+                    }
+                    else -> {
+                        val errorMessage = ""
+                        throw NoSuchMethodException("")
+                    }
+                }
+            }.onFailure {
+                throw NoSuchMethodException("")
+            }.map { methodInfo ->
+                kFunction to object :NativeApiInvoker {
+                    override fun invoke(vararg params: Any?): Any? {
+                        return kFunction.call(instance, *params)
+                    }
+                    override fun methodInfo(): MethodInfo = methodInfo
+                }
+            }.getOrThrow()
+        }
+    }.apply {
+        if (isNotEmpty()) {
+            supplier.get(toMap())
+        }
     }
 }

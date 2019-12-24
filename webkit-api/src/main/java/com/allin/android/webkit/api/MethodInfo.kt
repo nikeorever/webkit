@@ -1,4 +1,3 @@
 package com.allin.android.webkit.api
 
-class MethodInfo {
-}
+data class MethodInfo(val methodType: MethodType, val passContextToFirstParameter: Boolean)
