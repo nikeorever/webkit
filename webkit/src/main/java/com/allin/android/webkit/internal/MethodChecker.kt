@@ -7,15 +7,20 @@ package com.allin.android.webkit.internal
 import android.content.Context
 import androidx.annotation.RestrictTo
 import com.allin.android.webkit.annotations.JavascriptApi
+import com.allin.android.webkit.annotations.JavascriptNamespace
 import com.allin.android.webkit.api.*
 import kotlin.reflect.KFunction
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
+import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.full.valueParameters
 import kotlin.reflect.jvm.isAccessible
 
 @RestrictTo(value = [RestrictTo.Scope.LIBRARY_GROUP_PREFIX])
 fun functionInvokerMappersOf(instance: Any, supplier: FunctionInvokerMappersSupplier) {
+    val interceptor = instance::class.findAnnotation<JavascriptNamespace>()!!
+        .interceptor.primaryConstructor!!.call()
+
     val members = instance::class.members
     members.filter { it is KFunction && it.hasAnnotation<JavascriptApi>()}.map {
         val kFunction = it as KFunction
@@ -54,7 +59,8 @@ fun functionInvokerMappersOf(instance: Any, supplier: FunctionInvokerMappersSupp
             }.map { methodInfo ->
                 kFunction to object :NativeApiInvoker {
                     override fun invoke(vararg params: Any?): Any? {
-                        return kFunction.call(instance, *params)
+                        val invoker = Invoker(instance, kFunction, params)
+                        return interceptor.intercept(invoker)
                     }
                     override fun methodInfo(): MethodInfo = methodInfo
                 }
@@ -87,7 +93,8 @@ fun functionInvokerMappersOf(instance: Any, supplier: FunctionInvokerMappersSupp
             }.map { methodInfo ->
                 kFunction to object :NativeApiInvoker {
                     override fun invoke(vararg params: Any?): Any? {
-                        return kFunction.call(instance, *params)
+                        val invoker = Invoker(instance, kFunction, params)
+                        return interceptor.intercept(invoker)
                     }
                     override fun methodInfo(): MethodInfo = methodInfo
                 }

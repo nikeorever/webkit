@@ -9,6 +9,7 @@ checkstyle {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    api project(':webkit-api')
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8

@@ -4,11 +4,12 @@ import android.content.Context
 import android.util.Log
 import android.webkit.JavascriptInterface
 import androidx.annotation.Keep
+import com.allin.android.webkit.LogNativeApiInterceptor
 import com.allin.android.webkit.activity.WebActivity
 import com.allin.android.webkit.annotations.JavascriptApi
 import com.allin.android.webkit.annotations.JavascriptNamespace
 
-@JavascriptNamespace(namespace = "")
+@JavascriptNamespace(namespace = "", interceptor = LogNativeApiInterceptor::class)
 class ComponentOneJavascriptApi {
 
     @JavascriptApi(passContextToFirstParameter = true)

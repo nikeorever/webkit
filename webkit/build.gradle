@@ -67,5 +67,4 @@ dependencies {
     implementation 'com.tencent.tbs.tbssdk:sdk:43697'
     implementation 'com.google.android.material:material:1.0.0'
     api project(':webkit-annotations')
-    api project(':webkit-api')
 }
