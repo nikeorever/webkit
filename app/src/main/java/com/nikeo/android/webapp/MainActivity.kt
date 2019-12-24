@@ -3,7 +3,9 @@ package com.nikeo.android.webapp
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.*
 import com.allin.android.webkit.MainActivity
 import com.allin.android.webkit.activity.WebActivity
 import com.allin.android.webkit.annotations.JavascriptApi
@@ -27,4 +29,6 @@ class MainActivity : AppCompatActivity() {
 
         WebActivity().checkRoom(this)
     }
+
+
 }

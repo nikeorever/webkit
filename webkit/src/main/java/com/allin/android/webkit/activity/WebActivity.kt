@@ -1,9 +1,14 @@
 package com.allin.android.webkit.activity
 
 import android.content.Context
+import android.util.Log
 import android.webkit.JavascriptInterface
 import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.OnLifecycleEvent
 import com.allin.android.webkit.JavascriptApiRoom
 import com.allin.android.webkit.annotations.JavascriptApi
 import com.allin.android.webkit.api.NativeApiInvoker
@@ -13,10 +18,19 @@ import java.lang.reflect.Method
 
 class WebActivity {
 
-    fun checkRoom(context: Context) {
+    fun checkRoom(context: AppCompatActivity) {
         val javaScriptNamespaceInterfaces = JavascriptApiRoom.javaScriptNamespaceInterfaces
         println(javaScriptNamespaceInterfaces)
-        javaScriptNamespaceInterfaces[""].find("callNative1")?.invoke(context, "param")
+        val apiInvoker = javaScriptNamespaceInterfaces[""].find("callNative1")
+        val methodInfo = apiInvoker?.methodInfo()
+        val methodType = methodInfo?.methodType
+        val passContextToFirstParameter = methodInfo?.passContextToFirstParameter
+
+        apiInvoker?.invoke(context, "param")
+
+        JavascriptApiRoom.lifecycleRegistrants.forEach {
+            it.registerWith(context.lifecycle)
+        }
     }
 
     fun onCreate(activity: AppCompatActivity) {

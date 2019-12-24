@@ -33,6 +33,9 @@ android {
     }
 }
 
+sourceCompatibility = "8"
+targetCompatibility = "8"
+
 kapt {
     includeCompileClasspath = false
 }
