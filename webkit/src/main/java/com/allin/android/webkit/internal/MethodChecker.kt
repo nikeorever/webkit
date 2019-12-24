@@ -16,13 +16,23 @@ import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.full.valueParameters
 import kotlin.reflect.jvm.isAccessible
 
+private fun newInterceptorInstance(instance: Any): NativeApiInterceptor {
+    return runCatching {
+        instance::class.findAnnotation<JavascriptNamespace>()!!.interceptor.primaryConstructor!!.call()
+    }.onFailure {
+        throw NoSuchMethodException(
+            "require 0 parameter constructor in NativeApiInterceptor(@JavascriptNamespace annotated on ${instance::class.qualifiedName})"
+        )
+    }.getOrThrow()
+}
+
 @RestrictTo(value = [RestrictTo.Scope.LIBRARY_GROUP_PREFIX])
 fun functionInvokerMappersOf(instance: Any, supplier: FunctionInvokerMappersSupplier) {
-    val interceptor = instance::class.findAnnotation<JavascriptNamespace>()!!
-        .interceptor.primaryConstructor!!.call()
+
+    val interceptor = newInterceptorInstance(instance)
 
     val members = instance::class.members
-    members.filter { it is KFunction && it.hasAnnotation<JavascriptApi>()}.map {
+    members.filter { it is KFunction && it.hasAnnotation<JavascriptApi>() }.map {
         val kFunction = it as KFunction
         if (!kFunction.isAccessible) {
             kFunction.isAccessible = true
@@ -47,21 +57,24 @@ fun functionInvokerMappersOf(instance: Any, supplier: FunctionInvokerMappersSupp
                         valueParameters[1].type !== AsyncCallback::class
                         valueParameters[2].type === AsyncCallback::class
 
-                        MethodInfo(methodType = MethodType.ASYNC, passContextToFirstParameter = true)
+                        MethodInfo(
+                            methodType = MethodType.ASYNC,
+                            passContextToFirstParameter = true
+                        )
                     }
                     else -> {
-                        val errorMessage = ""
-                        throw NoSuchMethodException("")
+                        throw NoSuchMethodException()
                     }
                 }
             }.onFailure {
-                throw NoSuchMethodException("")
+                throw NoSuchMethodException()
             }.map { methodInfo ->
-                kFunction to object :NativeApiInvoker {
+                kFunction to object : NativeApiInvoker {
                     override fun invoke(vararg params: Any?): Any? {
                         val invoker = Invoker(instance, kFunction, params)
                         return interceptor.intercept(invoker)
                     }
+
                     override fun methodInfo(): MethodInfo = methodInfo
                 }
             }.getOrThrow()
@@ -75,27 +88,33 @@ fun functionInvokerMappersOf(instance: Any, supplier: FunctionInvokerMappersSupp
                     1 -> {
                         valueParameters[0].type !== AsyncCallback::class
 
-                        MethodInfo(methodType = MethodType.SYNC, passContextToFirstParameter = false)
+                        MethodInfo(
+                            methodType = MethodType.SYNC,
+                            passContextToFirstParameter = false
+                        )
                     }
                     2 -> {
                         valueParameters[0].type !== AsyncCallback::class
                         valueParameters[1].type === AsyncCallback::class
 
-                        MethodInfo(methodType = MethodType.ASYNC, passContextToFirstParameter = false)
+                        MethodInfo(
+                            methodType = MethodType.ASYNC,
+                            passContextToFirstParameter = false
+                        )
                     }
                     else -> {
-                        val errorMessage = ""
-                        throw NoSuchMethodException("")
+                        throw NoSuchMethodException()
                     }
                 }
             }.onFailure {
-                throw NoSuchMethodException("")
+                throw NoSuchMethodException()
             }.map { methodInfo ->
-                kFunction to object :NativeApiInvoker {
+                kFunction to object : NativeApiInvoker {
                     override fun invoke(vararg params: Any?): Any? {
                         val invoker = Invoker(instance, kFunction, params)
                         return interceptor.intercept(invoker)
                     }
+
                     override fun methodInfo(): MethodInfo = methodInfo
                 }
             }.getOrThrow()
