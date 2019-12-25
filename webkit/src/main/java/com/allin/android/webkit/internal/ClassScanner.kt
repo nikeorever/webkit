@@ -43,6 +43,11 @@ private fun executeOnDiskIO(runnable: () -> Unit) {
 
 @RestrictTo(value = [RestrictTo.Scope.LIBRARY_GROUP_PREFIX])
 fun listClassesInPackageOf(context: Context, packageName: String): Set<String>? {
+    val classes = AWebkitGeneratedClassesHelper.listClasses()
+    if (!classes.isNullOrEmpty()) {
+        return classes
+    }
+    // try
     if (packageName.isEmpty()) {
         return null
     }

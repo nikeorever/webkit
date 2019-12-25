@@ -1,19 +1,14 @@
 package com.allin.android.webkit.compiler
 
 import androidx.lifecycle.Lifecycle
-import com.allin.android.webkit.annotations.JavascriptApi
 import com.allin.android.webkit.annotations.JavascriptNamespace
 import com.allin.android.webkit.api.*
 import com.google.auto.service.AutoService
 import com.squareup.javapoet.*
-import com.sun.source.tree.ClassTree
-import com.sun.source.tree.TreeVisitor
-import com.sun.source.util.SimpleTreeVisitor
 import com.sun.source.util.Trees
 import com.sun.tools.javac.tree.JCTree
 import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
-import javax.lang.model.element.ElementVisitor
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.PackageElement
 import javax.lang.model.element.TypeElement
