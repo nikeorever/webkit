@@ -5,6 +5,7 @@ package com.allin.android.webkit
 import android.content.Context
 import androidx.lifecycle.Lifecycle
 import com.allin.android.webkit.api.*
+import com.allin.android.webkit.internal.scanClass
 import java.util.concurrent.Executor
 import kotlin.reflect.KFunction
 
@@ -13,15 +14,14 @@ object AWebkit {
     private val scannerRepository = ScannerRepository()
 
     fun init(context: Context) {
-        val fileNames = ClassUtils.getFileNameByPackageName(context, GENERATED_PACKAGE_NAME)
         val ignoredKey = "ignoredIndex"
-        fileNames.groupBy {
+        scanClass(context, GENERATED_PACKAGE_NAME)?.groupBy {
             when {
                 it.endsWith(SUFFIX_JS_COLLECTOR) -> SUFFIX_JS_COLLECTOR
                 it.endsWith(SUFFIX_LIFECYCLE_REGISTRANT) -> SUFFIX_LIFECYCLE_REGISTRANT
                 else -> ignoredKey
             }
-        }.apply {
+        }?.apply {
             this[SUFFIX_JS_COLLECTOR].takeUnless { it.isNullOrEmpty() }?.forEach { fileName ->
                 val collector =
                     Class.forName(fileName).getConstructor().newInstance() as JavascriptApiCollector

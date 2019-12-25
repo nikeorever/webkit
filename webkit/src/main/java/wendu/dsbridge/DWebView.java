@@ -23,8 +23,7 @@ import android.widget.FrameLayout;
 import androidx.annotation.Keep;
 import androidx.appcompat.app.AlertDialog;
 
-import com.allin.android.webkit.JavascriptApiRoom;
-import com.allin.android.webkit.JavascriptApiRoomKt;
+import com.allin.android.webkit.AWebkit;
 import com.allin.android.webkit.api.AsyncCallback;
 import com.allin.android.webkit.api.MethodType;
 import com.allin.android.webkit.api.NativeApiInvoker;
@@ -98,15 +97,11 @@ public class DWebView extends WebView {
             String[] nameStr = parseNamespace(methodName.trim());
             methodName = nameStr[1];
             // xianxueliang changed: start
-            Map<KFunction<?>, NativeApiInvoker> methodNativeApiInvoker = getJavaScriptNamespaceInterfaces().get(nameStr[0]);
+
             JSONObject ret = new JSONObject();
             try {
                 ret.put("code", -1);
             } catch (JSONException ignored) {
-            }
-            if (methodNativeApiInvoker == null || methodNativeApiInvoker.isEmpty()) {
-                PrintDebugInfo(error);
-                return ret.toString();
             }
 
             Object arg = null;
@@ -126,8 +121,14 @@ public class DWebView extends WebView {
                 e.printStackTrace();
                 return ret.toString();
             }
-            NativeApiInvoker nativeApiInvoker = JavascriptApiRoomKt
-                    .find(methodNativeApiInvoker, methodName);
+
+
+            NativeApiInvoker nativeApiInvoker =
+                    AWebkit.INSTANCE.findNativeInvoker(nameStr[0], methodName);
+            if (nativeApiInvoker == null) {
+                PrintDebugInfo(error);
+                return ret.toString();
+            }
             if (nativeApiInvoker.methodInfo().getMethodType() == MethodType.ASYNC) {
                 // async
                 final String cb = callback;
@@ -159,7 +160,7 @@ public class DWebView extends WebView {
                     PrintDebugInfo(error);
                     return ret.toString();
                 }
-            } else if (nativeApiInvoker != null) {
+            } else {
                 // sync
                 try {
                     Object retData = nativeApiInvoker.invoke(arg);
@@ -171,10 +172,6 @@ public class DWebView extends WebView {
                     PrintDebugInfo(error);
                     return ret.toString();
                 }
-            } else {
-                error = "Not find method \"" + methodName + "\" implementation! please check if the  signature or namespace of the method is right ";
-                PrintDebugInfo(error);
-                return ret.toString();
             }
 
             // xianxueliang changed: end
@@ -391,15 +388,15 @@ public class DWebView extends WebView {
                 String[] nameStr = parseNamespace(methodName);
 
                 // xianxueliang changed: start
-                Map<KFunction<?>, NativeApiInvoker> methodNativeApiInvoker =
-                        getJavaScriptNamespaceInterfaces().get(nameStr[0]);
+
                 NativeApiInvoker nativeApiInvoker =
-                        JavascriptApiRoomKt.find(methodNativeApiInvoker, nameStr[1]);
+                        AWebkit.INSTANCE.findNativeInvoker(nameStr[0], nameStr[1]);
                 boolean asyn = false;
-                if (nativeApiInvoker.methodInfo().getMethodType() == MethodType.ASYNC) {
-                    asyn = true;
-                }
                 if (nativeApiInvoker != null) {
+                    if (nativeApiInvoker.methodInfo().getMethodType() == MethodType.ASYNC) {
+                        asyn = true;
+                    }
+
                     if ("all".equals(type) || (asyn && "asyn".equals(type) || (!asyn && "syn".equals(type)))) {
                         return true;
                     }
@@ -1075,11 +1072,5 @@ public class DWebView extends WebView {
         }
         mainHandler.post(runnable);
     }
-
-    // xianxueliang changed: start
-    private Map<String, Map<KFunction<?>, NativeApiInvoker>> getJavaScriptNamespaceInterfaces() {
-        return JavascriptApiRoom.INSTANCE.getJavaScriptNamespaceInterfaces();
-    }
-    // xianxueliang changed: end
 
 }
