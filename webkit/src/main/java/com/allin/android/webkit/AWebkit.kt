@@ -5,8 +5,7 @@ package com.allin.android.webkit
 import android.content.Context
 import androidx.lifecycle.Lifecycle
 import com.allin.android.webkit.api.*
-import com.allin.android.webkit.internal.scanClass
-import java.util.concurrent.Executor
+import com.allin.android.webkit.internal.listClassesInPackageOf
 import kotlin.reflect.KFunction
 
 object AWebkit {
@@ -15,7 +14,7 @@ object AWebkit {
 
     fun init(context: Context) {
         val ignoredKey = "ignoredIndex"
-        scanClass(context, GENERATED_PACKAGE_NAME)?.groupBy {
+        listClassesInPackageOf(context, GENERATED_PACKAGE_NAME)?.groupBy {
             when {
                 it.endsWith(SUFFIX_JS_COLLECTOR) -> SUFFIX_JS_COLLECTOR
                 it.endsWith(SUFFIX_LIFECYCLE_REGISTRANT) -> SUFFIX_LIFECYCLE_REGISTRANT

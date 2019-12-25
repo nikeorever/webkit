@@ -40,7 +40,7 @@ private fun executeOnDiskIO(runnable: () -> Unit) {
     diskIO.execute(runnable)
 }
 
-fun scanClass(context: Context, packageName: String): Set<String>? {
+fun listClassesInPackageOf(context: Context, packageName: String): Set<String>? {
     if (packageName.isEmpty()) {
         return null
     }
