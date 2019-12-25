@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
 import android.util.Log
+import androidx.annotation.RestrictTo
 import dalvik.system.DexFile
 import java.io.File
 import java.io.IOException
@@ -40,6 +41,7 @@ private fun executeOnDiskIO(runnable: () -> Unit) {
     diskIO.execute(runnable)
 }
 
+@RestrictTo(value = [RestrictTo.Scope.LIBRARY_GROUP_PREFIX])
 fun listClassesInPackageOf(context: Context, packageName: String): Set<String>? {
     if (packageName.isEmpty()) {
         return null

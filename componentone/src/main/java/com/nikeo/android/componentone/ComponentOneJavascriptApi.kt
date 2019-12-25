@@ -8,7 +8,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
-import com.allin.android.webkit.LogNativeApiInterceptor
+import com.allin.android.webkit.interceptors.LogNativeApiInterceptor
 import com.allin.android.webkit.annotations.JavascriptApi
 import com.allin.android.webkit.annotations.JavascriptNamespace
 

@@ -1,10 +1,9 @@
-package com.allin.android.webkit
+package com.allin.android.webkit.interceptors
 
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import com.allin.android.webkit.api.DefaultNativeApiInterceptor
 import com.allin.android.webkit.api.Invoker
 
@@ -27,7 +26,10 @@ class MainThreadNativeApiInterceptor : DefaultNativeApiInterceptor() {
         if (mMainHandler == null) {
             synchronized(mLock) {
                 if (mMainHandler == null) {
-                    mMainHandler = createAsync(Looper.getMainLooper())
+                    mMainHandler =
+                        createAsync(
+                            Looper.getMainLooper()
+                        )
                 }
             }
         }
