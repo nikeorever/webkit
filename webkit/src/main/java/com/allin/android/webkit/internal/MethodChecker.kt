@@ -48,14 +48,14 @@ fun functionInvokerMappersOf(instance: Any, supplier: FunctionInvokerMappersSupp
                 when (valueParameters.size) {
                     2 -> {
                         valueParameters[0].type === Context::class
-                        valueParameters[1].type !== AsyncCallback::class
+                        valueParameters[1].type !== AsyncCaller::class
 
                         MethodInfo(methodType = MethodType.SYNC, passContextToFirstParameter = true)
                     }
                     3 -> {
                         valueParameters[0].type === Context::class
-                        valueParameters[1].type !== AsyncCallback::class
-                        valueParameters[2].type === AsyncCallback::class
+                        valueParameters[1].type !== AsyncCaller::class
+                        valueParameters[2].type === AsyncCaller::class
 
                         MethodInfo(
                             methodType = MethodType.ASYNC,
@@ -86,7 +86,7 @@ fun functionInvokerMappersOf(instance: Any, supplier: FunctionInvokerMappersSupp
             runCatching {
                 when (valueParameters.size) {
                     1 -> {
-                        valueParameters[0].type !== AsyncCallback::class
+                        valueParameters[0].type !== AsyncCaller::class
 
                         MethodInfo(
                             methodType = MethodType.SYNC,
@@ -94,8 +94,8 @@ fun functionInvokerMappersOf(instance: Any, supplier: FunctionInvokerMappersSupp
                         )
                     }
                     2 -> {
-                        valueParameters[0].type !== AsyncCallback::class
-                        valueParameters[1].type === AsyncCallback::class
+                        valueParameters[0].type !== AsyncCaller::class
+                        valueParameters[1].type === AsyncCaller::class
 
                         MethodInfo(
                             methodType = MethodType.ASYNC,

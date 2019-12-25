@@ -11,6 +11,7 @@ import androidx.lifecycle.OnLifecycleEvent
 import com.allin.android.webkit.interceptors.LogNativeApiInterceptor
 import com.allin.android.webkit.annotations.JavascriptApi
 import com.allin.android.webkit.annotations.JavascriptNamespace
+import com.allin.android.webkit.api.AsyncCaller
 
 @JavascriptNamespace(namespace = "", interceptor = LogNativeApiInterceptor::class)
 class ComponentOneJavascriptApi: LifecycleObserver{
@@ -18,8 +19,9 @@ class ComponentOneJavascriptApi: LifecycleObserver{
     @JavascriptApi(passContextToFirstParameter = true)
     @JavascriptInterface
     @Keep
-    fun callNative1(context: Context, param: String) {
-        Log.i("ComponentOneJavascriptApi", "callNative1: $context, $param")
+    fun callNative1(context: Context, param: String, caller: AsyncCaller) {
+        Log.i("CompOneJavascriptApi", "callNative1: $context, $param")
+        caller.call("from ComponentOneJavascriptApi", true)
     }
 
     @OnLifecycleEvent(value = Lifecycle.Event.ON_CREATE)

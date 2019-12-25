@@ -1,8 +1,9 @@
 package com.allin.android.webkit.activity
 
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.allin.android.webkit.AWebkit
-import com.allin.android.webkit.api.AsyncCallback
+import com.allin.android.webkit.api.AsyncCaller
 import com.allin.android.webkit.api.MethodType
 
 class WebActivity {
@@ -22,12 +23,13 @@ class WebActivity {
                 }
                 MethodType.ASYNC -> {
                     if (passContextToFirstParameter) {
-                        invoke(context, "param", object : AsyncCallback {
+                        invoke(context, "param", object : AsyncCaller {
                             override fun call(value: Any?, complete: Boolean) {
+                                Log.i("WebActivity", "$value : $complete")
                             }
                         })
                     } else {
-                        invoke("param", object : AsyncCallback {
+                        invoke("param", object : AsyncCaller {
                             override fun call(value: Any?, complete: Boolean) {
                             }
                         })

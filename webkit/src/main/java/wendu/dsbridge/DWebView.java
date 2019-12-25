@@ -24,7 +24,7 @@ import androidx.annotation.Keep;
 import androidx.appcompat.app.AlertDialog;
 
 import com.allin.android.webkit.AWebkit;
-import com.allin.android.webkit.api.AsyncCallback;
+import com.allin.android.webkit.api.AsyncCaller;
 import com.allin.android.webkit.api.MethodType;
 import com.allin.android.webkit.api.NativeApiInvoker;
 import com.tencent.smtt.export.external.interfaces.ConsoleMessage;
@@ -45,14 +45,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.lang.ref.WeakReference;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
-import kotlin.reflect.KFunction;
 
 import static android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW;
 
@@ -133,7 +129,7 @@ public class DWebView extends WebView {
                 // async
                 final String cb = callback;
                 try {
-                    nativeApiInvoker.invoke(arg, new AsyncCallback() {
+                    nativeApiInvoker.invoke(arg, new AsyncCaller() {
 
                         @Override
                         public void call(@Nullable Object value, boolean complete) {

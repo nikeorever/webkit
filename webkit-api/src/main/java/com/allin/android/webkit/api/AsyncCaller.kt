@@ -1,6 +1,6 @@
 package com.allin.android.webkit.api
 
-interface AsyncCallback {
+interface AsyncCaller {
 
     fun call(value: Any?, complete: Boolean)
 
