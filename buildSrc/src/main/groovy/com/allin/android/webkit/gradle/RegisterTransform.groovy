@@ -20,9 +20,8 @@ import java.util.zip.ZipEntry
 
 class RegisterTransform extends Transform {
 
-    static File fileContainsInitClass
-
-    ArrayList<String> classList = new ArrayList<>()
+    private ArrayList<String> matchedClasses = new ArrayList<>()
+    private File fileContainsRegistrantClass
 
     @Override
     String getName() {
@@ -49,7 +48,7 @@ class RegisterTransform extends Transform {
         if (invocation == null) {
             return
         }
-        Log.i('Start scan register info in jar file.')
+        Log.i('[AWebkit-ScanClass] task is started')
 
         long startTime = System.currentTimeMillis()
 
@@ -71,13 +70,13 @@ class RegisterTransform extends Transform {
             }
         }
 
-        Log.i('Scan finish, current cost time ' + (System.currentTimeMillis() - startTime) + "ms")
+        Log.i("[AWebkit-ScanClass] matched classes:\n${matchedClasses.join("\n")}")
+        Log.i("[AWebkit-ScanClass] task is finished, spent ${System.currentTimeMillis() - startTime} ms.")
 
-        Log.i("classList: ${classList.join('\n')}")
-        if (fileContainsInitClass) {
-            Log.i("fileContainsInitClass: $fileContainsInitClass")
-
-            def jarFile = fileContainsInitClass
+        if (fileContainsRegistrantClass) {
+            startTime = System.currentTimeMillis()
+            Log.i("[AWebkit-ModifyClass] task is started")
+            def jarFile = fileContainsRegistrantClass
             def optJar = new File(jarFile.getParent(), jarFile.name + ".opt")
             if (optJar.exists())
                 optJar.delete()
@@ -93,12 +92,11 @@ class RegisterTransform extends Transform {
                 jarOutputStream.putNextEntry(zipEntry)
                 if (Constants.GENERATE_TO_CLASS_FILE_NAME == entryName) {
 
-                    Log.i('Insert init code to class >> ' + entryName)
-
+                    Log.i("[AWebkit-ModifyClass] Inserting constants into ${Constants.GENERATE_TO_CLASS_FILE_NAME}")
                     def classReader = new ClassReader(IOUtils.toByteArray(inputStream))
                     def classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS)
 
-                    classReader.accept(new GenClassVisitor(classList, classWriter), ClassReader.EXPAND_FRAMES)
+                    classReader.accept(new GenClassVisitor(matchedClasses, classWriter), ClassReader.EXPAND_FRAMES)
 
                     def byteArr = classWriter.toByteArray()
                     jarOutputStream.write(byteArr)
@@ -115,9 +113,9 @@ class RegisterTransform extends Transform {
                 jarFile.delete()
             }
             optJar.renameTo(jarFile)
-        }
 
-        Log.i("Generate code finish, current cost time: " + (System.currentTimeMillis() - startTime) + "ms")
+            Log.i("[AWebkit-ModifyClass] task is finished, spent ${System.currentTimeMillis() - startTime} ms.")
+        }
     }
 
     private static void handJarInput(RegisterTransform transform, JarInput jarInput, TransformOutputProvider outputProvider) {
@@ -144,15 +142,12 @@ class RegisterTransform extends Transform {
                 while (enumeration.hasMoreElements()) {
                     JarEntry jarEntry = (JarEntry) enumeration.nextElement()
                     String entryName = jarEntry.getName()
-                    Log.i("entryName: $entryName")
                     if (entryName.startsWith(Constants.AWEBKIT_CLASS_PACKAGE_NAME)) {
                         InputStream inputStream = file.getInputStream(jarEntry)
                         scanClass(transform, inputStream)
                         inputStream.close()
                     } else if (Constants.GENERATE_TO_CLASS_FILE_NAME == entryName) {
-                        // mark this jar file contains RegisterCenter.class
-                        // After the scan is complete, we will generate register code into this file
-                        RegisterTransform.fileContainsInitClass = dest
+                        transform.fileContainsRegistrantClass = dest
                     }
                 }
                 file.close()
@@ -213,10 +208,9 @@ class RegisterTransform extends Transform {
 
         void visit(int version, int access, String name, String signature,
                    String superName, String[] interfaces) {
-            Log.i("name: $name; interface: ${interfaces.join(',')}")
             super.visit(version, access, name, signature, superName, interfaces)
             if (interfaces.any { Constants.AWEBKIT_CORE_INTERFACES.contains(it) }) {
-                transform.classList.add(name)
+                transform.matchedClasses.add(name)
             }
         }
     }
@@ -228,10 +222,10 @@ class RegisterTransform extends Transform {
         GenClassVisitor(ArrayList<String> classList, ClassWriter cw) {
             super(Opcodes.ASM6, cw)
             this.classList = classList
-            generateField(cw)
+            gen(cw)
         }
 
-        private void generateField(ClassWriter cw) {
+        private void gen(ClassWriter cw) {
             def size = classList.size()
 
             def mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, "getGeneratedClassesByAWebkit", "()[Ljava/lang/String;", null, null)
