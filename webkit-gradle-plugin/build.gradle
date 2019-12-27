@@ -1,0 +1,37 @@
+plugins {
+    id 'groovy'
+    id 'java-gradle-plugin'
+    id 'maven-publish'
+}
+
+group 'com.allin.android.gradle'
+version '1.0-SNAPSHOT'
+
+gradlePlugin {
+    plugins {
+        awebkit {
+            id = 'com.allin.android.gradle.awebkit'
+            implementationClass = 'com.allin.android.webkit.gradle.AWebkitPlugin'
+        }
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            url rootProject.ext.gradle_plugin_local_maven_url
+        }
+    }
+}
+
+repositories {
+    google()
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+    implementation 'com.android.tools.build:gradle:3.5.3'
+}

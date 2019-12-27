@@ -12,7 +12,7 @@ import com.allin.android.webkit.annotations.JavascriptNamespace
 
 @Keep
 @JavascriptNamespace(namespace = "")
-class ComponentTwoJavascriptApi: LifecycleObserver{
+class ComponentTwoJavascriptApi{
 
     @JavascriptApi(passContextToFirstParameter = false)
     @Keep

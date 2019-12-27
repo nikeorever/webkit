@@ -2,14 +2,34 @@
 
 buildscript {
     ext.kotlin_version = '1.3.61'
+    ext.gradle_plugin_local_maven_url = new File(project(':webkit-gradle-plugin').buildDir, '/consuming/maven-repo')
     repositories {
         google()
         jcenter()
 
+        maven {
+            url = gradle_plugin_local_maven_url
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.3'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+
+        println "AWebkitGradlePlugin status: $enableAWebkitGradlePlugin"
+
+        if (Boolean.parseBoolean(enableAWebkitGradlePlugin)) {
+            if (gradle_plugin_local_maven_url.exists()) {
+                classpath "com.allin.android.gradle:webkit-gradle-plugin:1.0-SNAPSHOT"
+            } else {
+                throw new IllegalStateException(''' 
+AWebkit Gradle Plugin is not found, please execute as follow step:
+1.change awebkit.gradlePluginEnable = false in gradle.properties.
+2.run ./gradlew :webkit-gradle-plugin:publish in root directory.
+3.change awebkit.gradlePluginEnable = true in gradle.properties.
+4.build again.
+''')
+            }
+        }
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -19,7 +39,6 @@ allprojects {
     repositories {
         google()
         jcenter()
-
     }
 }
 

@@ -1,2 +1,10 @@
-include ':app', ':webkit', ':componentone', ':componenttwo', ':webkit-compiler', ':webkit-annotations', ':webkit-api'
+include ':app'
+include ':componentone'
+include ':componenttwo'
+include ':webkit'
+include ':webkit-compiler'
+include ':webkit-annotations'
+include ':webkit-api'
+include ':webkit-gradle-plugin'
+
 rootProject.name='WebApp'

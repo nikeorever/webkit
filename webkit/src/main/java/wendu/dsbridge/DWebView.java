@@ -135,15 +135,15 @@ public class DWebView extends WebView {
                         public void call(@Nullable Object value, boolean complete) {
                             try {
                                 JSONObject ret = new JSONObject();
-                                ret.put("code", 0);
-                                ret.put("data", value);
-                                //retValue = URLEncoder.encode(ret.toString(), "UTF-8").replaceAll("\\+", "%20");
-                                if (cb != null) {
-                                    //String script = String.format("%s(JSON.parse(decodeURIComponent(\"%s\")).data);", cb, retValue);
-                                    String script = String.format("%s(%s.data);", cb, ret.toString());
-                                    if (complete) {
-                                        script += "delete window." + cb;
-                                    }
+                                    ret.put("code", 0);
+                                    ret.put("data", value);
+                                    //retValue = URLEncoder.encode(ret.toString(), "UTF-8").replaceAll("\\+", "%20");
+                                    if (cb != null) {
+                                        //String script = String.format("%s(JSON.parse(decodeURIComponent(\"%s\")).data);", cb, retValue);
+                                        String script = String.format("%s(%s.data);", cb, ret.toString());
+                                        if (complete) {
+                                            script += "delete window." + cb;
+                                        }
                                     evaluateJavascript(script);
                                 }
                             } catch (Exception ignored) {
@@ -350,7 +350,7 @@ public class DWebView extends WebView {
         settings.setAppCachePath(APP_CACHE_DIRNAME);
         settings.setUseWideViewPort(true);
         super.setWebChromeClient(mWebChromeClient);
-        addInternalJavascriptObject();
+//        addInternalJavascriptObject();
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
             super.addJavascriptInterface(innerJavascriptInterface, BRIDGE_NAME);
         } else {

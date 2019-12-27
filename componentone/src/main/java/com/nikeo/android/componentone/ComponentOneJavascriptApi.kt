@@ -17,7 +17,6 @@ import com.allin.android.webkit.api.AsyncCaller
 class ComponentOneJavascriptApi: LifecycleObserver{
 
     @JavascriptApi(passContextToFirstParameter = true)
-    @JavascriptInterface
     @Keep
     fun callNative1(context: Context, param: String, caller: AsyncCaller) {
         Log.i("CompOneJavascriptApi", "callNative1: $context, $param")

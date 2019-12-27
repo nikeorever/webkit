@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.allin.android.webkit.AWebkit
 import com.allin.android.webkit.MainActivity
 import com.allin.android.webkit.activity.WebActivity
+import com.google.gson.Gson
 
 class MainActivity : AppCompatActivity() {
 
