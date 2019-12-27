@@ -5,8 +5,8 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
-if (Boolean.parseBoolean(enableAWebkitGradlePlugin)) {
-    println 'AWebkitGradlePlugin is enable'
+if (Boolean.parseBoolean(enableAWebkitLocalGradlePlugin)) {
+    println 'AWebkitLocalGradlePlugin is enable'
     apply plugin: 'com.allin.android.gradle.awebkit'
 }
 

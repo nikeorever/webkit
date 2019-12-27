@@ -15,17 +15,17 @@ buildscript {
         classpath 'com.android.tools.build:gradle:3.5.3'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
-        println "AWebkitGradlePlugin status: $enableAWebkitGradlePlugin"
+        println "AWebkitLocalGradlePlugin status: $enableAWebkitLocalGradlePlugin"
 
-        if (Boolean.parseBoolean(enableAWebkitGradlePlugin)) {
+        if (Boolean.parseBoolean(enableAWebkitLocalGradlePlugin)) {
             if (gradle_plugin_local_maven_url.exists()) {
                 classpath "com.allin.android.gradle:webkit-gradle-plugin:1.0-SNAPSHOT"
             } else {
                 throw new IllegalStateException(''' 
 AWebkit Gradle Plugin is not found, please execute as follow step:
-1.change enableAWebkitGradlePlugin=false in gradle.properties.
+1.change enableAWebkitLocalGradlePlugin=false in gradle.properties.
 2.run ./gradlew :webkit-gradle-plugin:publish in root directory.
-3.change enableAWebkitGradlePlugin=true in gradle.properties.
+3.change enableAWebkitLocalGradlePlugin=true in gradle.properties.
 4.build again.
 ''')
             }
